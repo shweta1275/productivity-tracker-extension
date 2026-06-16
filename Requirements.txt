@@ -1,0 +1,7 @@
+Just kiddin nothing is required here 
+you just need to install this on ur pc/ system/mac or macintosh as i like to call it 
+then just go to ur chrome://extensions and swithc to developer mode 
+at this point you will feel very cool
+now you shall see a button called load unpacked 
+now just click and choose the folder wheree u have pulled this git repo into and then just say add 
+and pin it to your task bar and boom ur good to go 
