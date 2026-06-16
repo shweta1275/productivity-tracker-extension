@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DayCheck</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 380px;
+      min-height: 500px;
+      background: #0d0d0f;
+      color: #e8e6e3;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 13px;
+    }
+
+    /* ── Header ── */
+    .header {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #1e1e22;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .logo {
+      width: 28px; height: 28px;
+      background: linear-gradient(135deg, #7c6aff, #a78bfa);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .brand { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; color: #f0eee8; }
+    .date-badge {
+      font-size: 10px; color: #6b6878;
+      background: #18181c; border-radius: 4px;
+      padding: 2px 7px; margin-top: 1px;
+    }
+    .settings-btn {
+      background: none; border: none; cursor: pointer;
+      color: #55526a; font-size: 16px; padding: 4px;
+      border-radius: 4px; transition: color 0.15s;
+    }
+    .settings-btn:hover { color: #a78bfa; }
+
+    /* ── Score bar ── */
+    .score-section {
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid #1a1a1e;
+    }
+    .score-label { font-size: 10px; color: #6b6878; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+    .score-row { display: flex; align-items: flex-end; gap: 10px; margin-bottom: 10px; }
+    .score-number { font-size: 42px; font-weight: 800; line-height: 1; letter-spacing: -2px; }
+    .score-number.high { color: #4ade80; }
+    .score-number.mid  { color: #facc15; }
+    .score-number.low  { color: #f87171; }
+    .score-meta { padding-bottom: 6px; }
+    .score-verdict { font-size: 13px; font-weight: 600; color: #c4c0d4; }
+    .score-sub { font-size: 11px; color: #6b6878; margin-top: 1px; }
+
+    /* ring bar */
+    .ring-bars { display: flex; gap: 3px; height: 6px; border-radius: 3px; overflow: hidden; }
+    .ring-bar { height: 100%; border-radius: 2px; transition: width 0.4s ease; }
+    .rb-productive { background: #4ade80; }
+    .rb-neutral    { background: #60a5fa; }
+    .rb-timepass   { background: #f87171; }
+    .rb-other      { background: #3a3944; }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #1a1a1e;
+    }
+    .tab-btn {
+      flex: 1; padding: 9px 4px;
+      background: none; border: none; cursor: pointer;
+      font-size: 11px; font-weight: 600; color: #55526a;
+      text-transform: uppercase; letter-spacing: 0.6px;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .tab-btn.active { color: #a78bfa; border-bottom-color: #a78bfa; }
+    .tab-btn:hover:not(.active) { color: #8b87a6; }
+
+    /* ── Content ── */
+    .content { padding: 12px 16px; max-height: 340px; overflow-y: auto; }
+    .content::-webkit-scrollbar { width: 3px; }
+    .content::-webkit-scrollbar-track { background: transparent; }
+    .content::-webkit-scrollbar-thumb { background: #2e2c3a; border-radius: 2px; }
+
+    /* ── Category blocks ── */
+    .cat-block { margin-bottom: 14px; }
+    .cat-header {
+      display: flex; align-items: center; gap: 7px;
+      margin-bottom: 6px;
+    }
+    .cat-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .cat-dot.productive { background: #4ade80; }
+    .cat-dot.timepass   { background: #f87171; }
+    .cat-dot.neutral    { background: #60a5fa; }
+    .cat-dot.other      { background: #55526a; }
+    .cat-name { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; }
+    .cat-name.productive { color: #4ade80; }
+    .cat-name.timepass   { color: #f87171; }
+    .cat-name.neutral    { color: #60a5fa; }
+    .cat-name.other      { color: #55526a; }
+    .cat-total { margin-left: auto; font-size: 11px; color: #6b6878; font-weight: 600; }
+
+    /* ── Site rows ── */
+    .site-row {
+      display: flex; align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid #16161a;
+      gap: 8px;
+    }
+    .site-row:last-child { border-bottom: none; }
+    .site-favicon {
+      width: 14px; height: 14px;
+      border-radius: 3px; flex-shrink: 0;
+      background: #1e1e24;
+    }
+    .site-info { flex: 1; min-width: 0; }
+    .site-name {
+      font-size: 12px; color: #c4c0d4;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .site-domain { font-size: 10px; color: #4a4860; margin-top: 1px; }
+    .site-time { font-size: 12px; font-weight: 700; color: #7c78a0; flex-shrink: 0; }
+    .site-bar-wrap { width: 100%; height: 2px; background: #1e1e24; border-radius: 1px; margin-top: 3px; }
+    .site-bar { height: 100%; border-radius: 1px; }
+    .site-bar.productive { background: #4ade80; }
+    .site-bar.timepass   { background: #f87171; }
+    .site-bar.neutral    { background: #60a5fa; }
+    .site-bar.other      { background: #55526a; }
+
+    /* ── Timeline tab ── */
+    .timeline-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid #16161a;
+    }
+    .tl-time { font-size: 10px; color: #4a4860; flex-shrink: 0; width: 42px; padding-top: 1px; }
+    .tl-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 3px; flex-shrink: 0; }
+    .tl-body { flex: 1; min-width: 0; }
+    .tl-title { font-size: 11px; color: #c4c0d4; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tl-domain { font-size: 10px; color: #4a4860; }
+    .tl-dur { font-size: 10px; color: #7c78a0; flex-shrink: 0; padding-top: 1px; }
+
+    /* ── Reality Check tab ── */
+    .reality-card {
+      background: #13131a;
+      border: 1px solid #1e1e26;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+    .rc-title { font-size: 11px; font-weight: 700; color: #7c78a0; text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 10px; }
+    .rc-stat-row { display: flex; justify-content: space-between; margin-bottom: 6px; }
+    .rc-stat-label { font-size: 12px; color: #7c78a0; }
+    .rc-stat-val { font-size: 12px; font-weight: 700; }
+    .rc-stat-val.g { color: #4ade80; }
+    .rc-stat-val.r { color: #f87171; }
+    .rc-stat-val.b { color: #60a5fa; }
+    .rc-stat-val.y { color: #facc15; }
+
+    .achievements { display: flex; flex-direction: column; gap: 6px; }
+    .ach-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px;
+      background: #18181f;
+      border-radius: 7px;
+      border-left: 3px solid;
+    }
+    .ach-item.good { border-color: #4ade80; }
+    .ach-item.bad  { border-color: #f87171; }
+    .ach-item.info { border-color: #60a5fa; }
+    .ach-emoji { font-size: 14px; }
+    .ach-text { font-size: 11px; color: #c4c0d4; line-height: 1.4; }
+
+    /* ── Empty state ── */
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #4a4860;
+    }
+    .empty-icon { font-size: 32px; margin-bottom: 10px; }
+    .empty-text { font-size: 12px; line-height: 1.6; }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 8px 16px;
+      border-top: 1px solid #1a1a1e;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .privacy-note { font-size: 10px; color: #3a3948; }
+    .refresh-btn {
+      font-size: 10px; color: #55526a;
+      background: none; border: none; cursor: pointer;
+      padding: 3px 6px; border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .refresh-btn:hover { color: #a78bfa; background: #1a1820; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo">📊</div>
+    <div>
+      <div class="brand">DayCheck</div>
+      <div class="date-badge" id="dateBadge">—</div>
+    </div>
+  </div>
+  <button class="settings-btn" id="settingsBtn" title="Settings">⚙️</button>
+</div>
+
+<div class="score-section">
+  <div class="score-label">Today's Focus Score</div>
+  <div class="score-row">
+    <div class="score-number" id="scoreNum">—</div>
+    <div class="score-meta">
+      <div class="score-verdict" id="scoreVerdict">Loading...</div>
+      <div class="score-sub" id="scoreSub"></div>
+    </div>
+  </div>
+  <div class="ring-bars" id="ringBars">
+    <div class="ring-bar rb-other" style="width:100%"></div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="sites">Sites</button>
+  <button class="tab-btn" data-tab="timeline">Timeline</button>
+  <button class="tab-btn" data-tab="reality">Reality Check</button>
+</div>
+
+<div class="content" id="contentArea">
+  <div class="empty">
+    <div class="empty-icon">⏳</div>
+    <div class="empty-text">Loading your day...</div>
+  </div>
+</div>
+
+<div class="footer">
+  <span class="privacy-note">🔒 All data stays on your device</span>
+  <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

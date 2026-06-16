@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>DayCheck Settings</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d0f;
+      color: #e8e6e3;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px;
+      padding: 30px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    h1 { font-size: 22px; font-weight: 800; color: #f0eee8; margin-bottom: 4px; letter-spacing: -0.5px; }
+    .sub { color: #6b6878; font-size: 13px; margin-bottom: 30px; }
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 12px;
+    }
+    .section-title.g { color: #4ade80; }
+    .section-title.r { color: #f87171; }
+    .section-title.b { color: #60a5fa; }
+
+    textarea {
+      width: 100%; padding: 10px 12px;
+      background: #13131a; border: 1px solid #2a2835;
+      border-radius: 8px; color: #c4c0d4;
+      font-family: 'Courier New', monospace; font-size: 12px;
+      resize: vertical; min-height: 100px;
+      line-height: 1.7;
+    }
+    textarea:focus { outline: none; border-color: #7c6aff; }
+    .hint { font-size: 11px; color: #4a4860; margin-top: 6px; }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+    button {
+      padding: 10px 20px;
+      border-radius: 8px; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 600;
+    }
+    .btn-save { background: #7c6aff; color: white; }
+    .btn-save:hover { background: #6b58ee; }
+    .btn-clear { background: #2a1f1f; color: #f87171; border: 1px solid #3a2525; }
+    .btn-clear:hover { background: #3a2525; }
+
+    .toast {
+      position: fixed; bottom: 20px; right: 20px;
+      background: #4ade80; color: #0d1a10;
+      padding: 10px 18px; border-radius: 8px;
+      font-weight: 700; font-size: 13px;
+      opacity: 0; transition: opacity 0.3s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+
+    .yt-note {
+      background: #131320; border: 1px solid #2a2850;
+      border-radius: 8px; padding: 12px 14px;
+      font-size: 12px; color: #7c78a0; line-height: 1.6;
+      margin-bottom: 20px;
+    }
+    .yt-note strong { color: #a78bfa; }
+
+    .data-section {
+      background: #13131a; border: 1px solid #1e1e26;
+      border-radius: 10px; padding: 16px;
+    }
+    .data-info { font-size: 12px; color: #6b6878; margin-bottom: 12px; line-height: 1.7; }
+  </style>
+</head>
+<body>
+
+<h1>⚙️ DayCheck Settings</h1>
+<p class="sub">Customize site categories and manage your data. All stored locally.</p>
+
+<div class="yt-note">
+  <strong>YouTube is smart:</strong> If a video title contains words like "tutorial", "course", "learn", "leetcode", "explained", "how to", "machine learning", etc. — it auto-counts as <strong>Productive</strong>. Casual/entertainment YouTube = Timepass. You can't override individual videos, but you can add domains below.
+</div>
+
+<div class="section">
+  <div class="section-title g">✅ Productive Sites</div>
+  <textarea id="productive" placeholder="leetcode.com&#10;github.com&#10;kaggle.com"></textarea>
+  <div class="hint">One domain per line. These override the defaults.</div>
+</div>
+
+<div class="section">
+  <div class="section-title r">📱 Timepass Sites</div>
+  <textarea id="timepass" placeholder="instagram.com&#10;twitter.com&#10;netflix.com"></textarea>
+  <div class="hint">Add anything you consider a distraction.</div>
+</div>
+
+<div class="section">
+  <div class="section-title b">⚖️ Neutral Sites</div>
+  <textarea id="neutral" placeholder="google.com&#10;gmail.com&#10;amazon.in"></textarea>
+  <div class="hint">Browsing that's neither productive nor timepass — doesn't affect score.</div>
+</div>
+
+<div class="section">
+  <div class="section-title" style="color:#6b6878">🗂️ Your Data</div>
+  <div class="data-section">
+    <div class="data-info">
+      All tracking data is stored in Chrome's local storage on your device only. Nothing is sent anywhere — no server, no analytics, no syncing. You can clear all data below.<br><br>
+      <strong style="color:#c4c0d4">Storage location:</strong> chrome.storage.local (your Chrome profile folder)
+    </div>
+    <button class="btn-clear" id="clearBtn">🗑️ Clear all tracking data</button>
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn-save" id="saveBtn">💾 Save Settings</button>
+</div>
+
+<div class="toast" id="toast">Saved!</div>
+
+<script>
+async function loadSettings() {
+  const data = await chrome.storage.local.get('customCategories');
+  const c = data.customCategories || { productive: [], timepass: [], neutral: [] };
+  document.getElementById('productive').value = c.productive.join('\n');
+  document.getElementById('timepass').value = c.timepass.join('\n');
+  document.getElementById('neutral').value = c.neutral.join('\n');
+}
+
+async function saveSettings() {
+  const parse = id => document.getElementById(id).value
+    .split('\n').map(s => s.trim().toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,''))
+    .filter(Boolean);
+
+  const custom = {
+    productive: parse('productive'),
+    timepass: parse('timepass'),
+    neutral: parse('neutral')
+  };
+
+  await chrome.storage.local.set({ customCategories: custom });
+  const t = document.getElementById('toast');
+  t.textContent = '✅ Saved!';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+async function clearAllData() {
+  if (!confirm('Delete ALL your tracking data? This cannot be undone.')) return;
+  const data = await chrome.storage.local.get(null);
+  const dayKeys = Object.keys(data).filter(k => k.startsWith('day_'));
+  await chrome.storage.local.remove(dayKeys);
+  const t = document.getElementById('toast');
+  t.textContent = '🗑️ Cleared!';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+document.getElementById('saveBtn').addEventListener('click', saveSettings);
+document.getElementById('clearBtn').addEventListener('click', clearAllData);
+loadSettings();
+</script>
+</body>
+</html>
